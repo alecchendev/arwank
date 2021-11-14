@@ -22,10 +22,47 @@ const Edit = () => {
   const updateText = (event) => {
     const newText = event.target.value;
     setText(newText);
+    const textarea = document.getElementById("textarea");
+    textarea.style.height = textarea.scrollHeight + 3 + "px";
   }
 
   const publishStory = async () => {
+    console.log("Publishing...");
+    // form story data as JSON
+    const data = {
 
+      title: title,
+      content: text
+    }
+
+    // base64 encode
+
+    // create transaction
+    let transaction = await arweave.createTransaction({ data: JSON.stringify(data) }, key);
+
+    // sign transaction
+    await arweave.transactions.sign(transaction, key);
+
+    // submit to arweave
+    const response = await arweave.transactions.post(transaction);
+
+    // check/wait for status?
+    arweave.transactions.getStatus('bNbA3TEQVL60xlgCcqdz4ZPHFZ711cZ3hmkpGttDt_U').then(res => {
+      console.log(res);
+      // {
+      //  status: 200,
+      //  confirmed: {
+      //    block_height: 140151,
+      //    block_indep_hash: 'OR1wue3oBSg3XWvH0GBlauAtAjBICVs2F_8YLYQ3aoAR7q6_3fFeuBOw7d-JTEdR',
+      //    number_of_confirmations: 20
+      //  }
+      //}
+    })
+
+    console.log("transaction:", transaction);
+    console.log("response:", response);
+
+    console.log("Published.");
   }
 
   const selectFiles = () => {
@@ -98,8 +135,9 @@ const Edit = () => {
           placeholder={"Type your title here..."}
           onChange={updateTitle}
         />
-        <input
-          type="text"
+        <textarea
+          // type="text"
+          id="textarea"
           className="text-input"
           value={text}
           placeholder={"Type your story here..."}

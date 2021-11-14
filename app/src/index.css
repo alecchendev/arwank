@@ -33,11 +33,16 @@ button:hover, input[type=file]::file-selector-button:hover {
   text-decoration: line-through;
 }
 
+textarea {
+  resize: none;
+  line-height: 1.666;
+}
+
 input[type="file"] {
   
 }
 
-p, li, input[type="text"] {
+p, li, textarea, input[type="text"] {
   font-family: Work sans, sans-serif;
 }
 
