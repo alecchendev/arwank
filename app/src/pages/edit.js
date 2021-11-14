@@ -1,5 +1,5 @@
 
-
+import '../styles/edit.css';
 import { useState, useEffect } from 'react';
 import Arweave from 'arweave';
 import { Link } from "react-router-dom";
@@ -11,6 +11,22 @@ const Edit = () => {
 
   const [ key, setKey ] = useState(null);
   const [ pubkey, setPubkey ] = useState(null);
+  const [ text, setText ] = useState("");
+  const [ title, setTitle ] = useState("");
+  
+  const updateTitle = (event) => {
+    const newTitle = event.target.value;
+    setTitle(newTitle);
+  }
+
+  const updateText = (event) => {
+    const newText = event.target.value;
+    setText(newText);
+  }
+
+  const publishStory = async () => {
+
+  }
 
   const selectFiles = () => {
     console.log("clicked");
@@ -42,8 +58,8 @@ const Edit = () => {
   }
 
   useEffect(async () => {
-    const result = await arweave.blocks.get("zbUPQFA4ybnd8h99KI9Iqh4mogXJibr0syEwuJPrFHhOhld7XBMOUDeXfsIGvYDp"); 
-    console.log(result);
+    // const result = await arweave.blocks.get("zbUPQFA4ybnd8h99KI9Iqh4mogXJibr0syEwuJPrFHhOhld7XBMOUDeXfsIGvYDp"); 
+    // console.log(result);
 
     // let key = await arweave.wallets.generate();
     // console.log(key);
@@ -60,15 +76,37 @@ const Edit = () => {
       {
         pubkey
         ?
-        <p>Logged in: {pubkey}</p>
+        <div>
+          <p>Logged in: {pubkey}</p>
+          <button onClick={publishStory}>Publish</button>
+        </div>
         :
         <div className="file-upload-container">
           <label>
             Drag Or Select Wallet
           </label>
-          <input type="file" id="select-files" className="file-upload-input" onChange={selectFiles} />
+          <input type="file" id="select-files" className="file-upload-input" onChange={selectFiles}/>
+          <button className="invalid-button">Publish</button>
         </div>
       }
+
+      <div className="text-editor">
+        <input
+          type="text"
+          className="title-input"
+          value={title}
+          placeholder={"Type your title here..."}
+          onChange={updateTitle}
+        />
+        <input
+          type="text"
+          className="text-input"
+          value={text}
+          placeholder={"Type your story here..."}
+          onChange={updateText}
+        />
+      </div>
+
 
       
     </div>
