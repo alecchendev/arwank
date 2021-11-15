@@ -3,7 +3,34 @@ import '../styles/edit.css';
 import { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
 // import axios from 'axios';
+import idl from '../data/idl.json';
 
+import { Connection, PublicKey, clusterApiUrl} from '@solana/web3.js';
+import {
+  Program, Provider, web3
+} from '@project-serum/anchor';
+import kp from '../data/keypair.json'
+
+// SystemProgram is a reference to the Solana runtime!
+const { SystemProgram, Keypair } = web3;
+
+// Create a keypair for the account that will hold the GIF data.
+const arr = Object.values(kp._keypair.secretKey);
+const secret = new Uint8Array(arr);
+const baseAccount = web3.Keypair.fromSecretKey(secret);
+// const baseAccount = web3.Keypair.generate();
+
+// Get our program's id form the IDL file.
+const programID = new PublicKey(idl.metadata.address);
+
+// Set our network to devent.
+const network = clusterApiUrl('devnet');
+// const network = 'http://localhost:8899';
+
+// Control's how we want to acknowledge when a trasnaction is "done".
+const opts = {
+  preflightCommitment: "processed" // can also "finalized"
+}
 
 
 const Edit = ({ arweave }) => {
@@ -12,6 +39,16 @@ const Edit = ({ arweave }) => {
   const [ pubkey, setPubkey ] = useState(null);
   const [ text, setText ] = useState("");
   const [ title, setTitle ] = useState("");
+
+  const [walletAddress, setWalletAddress] = useState(null);
+
+  const getProvider = () => {
+    const connection = new Connection(network, opts.preflightCommitment);
+    const provider = new Provider(
+      connection, window.solana, opts.preflightCommitment,
+    );
+    return provider;
+  }
   
   const updateTitle = (event) => {
     const newTitle = event.target.value;
@@ -44,44 +81,65 @@ const Edit = ({ arweave }) => {
 
     // submit to arweave
     const response = await arweave.transactions.post(transaction);
-    // const headers = {
-    //   'Content-Type': 'application/json',
-    //   'Authorization': 'JWT fefege...'
-    // }
-    
-    // axios.post(Helper.getUserAPI(), data, {
-    //     headers: headers
-    //   })
-    //   .then((response) => {
-    //     dispatch({
-    //       type: FOUND_USER,
-    //       data: response.data[0]
-    //     })
-    //   })
-    //   .catch((error) => {
-    //     dispatch({
-    //       type: ERROR_FINDING_USER
-    //     })
-    //   })
 
 
     // check/wait for status?
-    arweave.transactions.getStatus('bNbA3TEQVL60xlgCcqdz4ZPHFZ711cZ3hmkpGttDt_U').then(res => {
-      console.log(res);
-      // {
-      //  status: 200,
-      //  confirmed: {
-      //    block_height: 140151,
-      //    block_indep_hash: 'OR1wue3oBSg3XWvH0GBlauAtAjBICVs2F_8YLYQ3aoAR7q6_3fFeuBOw7d-JTEdR',
-      //    number_of_confirmations: 20
-      //  }
-      //}
-    })
+    // arweave.transactions.getStatus('bNbA3TEQVL60xlgCcqdz4ZPHFZ711cZ3hmkpGttDt_U').then(res => {
+    //   console.log(res);
+    //   // {
+    //   //  status: 200,
+    //   //  confirmed: {
+    //   //    block_height: 140151,
+    //   //    block_indep_hash: 'OR1wue3oBSg3XWvH0GBlauAtAjBICVs2F_8YLYQ3aoAR7q6_3fFeuBOw7d-JTEdR',
+    //   //    number_of_confirmations: 20
+    //   //  }
+    //   //}
+    // })
 
     console.log("transaction:", transaction);
     console.log("response:", response);
 
     console.log("Published.");
+
+    // smart contract part
+    const provider = getProvider();
+    const program = new Program(idl, programID, provider);
+
+    let account = await program.account.baseAccount.fetch(baseAccount.publicKey);
+    const pointer = account.data.toString();
+    console.log('Pointer: ', account.data.toString());
+
+    let storyIds = [];
+    if (pointer !== '') {
+      // use array from transaction
+      try {
+        const dataStr = await arweave.transactions.getData(pointer, {decode: true, string: true});
+        const data = JSON.parse(dataStr);
+        storyIds = data.txids;
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    const newData = { txids: storyIds };
+    console.log("newData:", newData);
+    let pointerTransaction = await arweave.createTransaction({ data: JSON.stringify(data) }, key);
+
+    // // sign transaction
+    await arweave.transactions.sign(pointerTransaction, key);
+    console.log("pointerTransaction", pointerTransaction);
+
+    // submit to arweave
+    let pointerResponse = await arweave.transactions.post(pointerTransaction);
+    console.log("pointerResponse:", pointerResponse);
+
+    const newPointer = pointerTransaction.id;
+    console.log("newPointer:", newPointer);
+    await program.rpc.setPointer(newPointer, {
+      accounts: {
+        baseAccount: baseAccount.publicKey,
+      },
+    });
   }
 
   const selectFiles = () => {
@@ -113,6 +171,56 @@ const Edit = ({ arweave }) => {
     fr.readAsText(files.item(0));
   }
 
+  /*
+   * This function holds the logic for deciding if a Phantom Wallet is
+   * connected or not
+   */
+  const checkIfWalletIsConnected = async () => {
+    try {
+      const { solana } = window;
+
+      if (solana) {
+        if (solana.isPhantom) {
+          console.log('Phantom wallet found!');
+        }
+
+        /*
+         * The solana object gives us a function that will allow us to connect
+         * directly with the user's wallet!
+         */
+        const response = await solana.connect({ onlyIfTrusted: true });
+        console.log(
+          'Connected with Public Key:',
+          response.publicKey.toString()
+        );
+
+        /*
+           * Set the user's publicKey in state to be used later!
+           */
+        setWalletAddress(response.publicKey.toString());
+
+      } else {
+        alert('Solana object not found! Get a Phantom Wallet 👻');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  /*
+   * Let's define this method so our code doesn't break.
+   * We will write the logic for this next!
+   */
+  const connectWallet = async () => {
+    const { solana } = window;
+
+    if (solana) {
+      const response = await solana.connect();
+      console.log('Connected with Public Key:', response.publicKey.toString());
+      setWalletAddress(response.publicKey.toString());
+    }
+  };
+
   useEffect(async () => {
     // const result = await arweave.blocks.get("zbUPQFA4ybnd8h99KI9Iqh4mogXJibr0syEwuJPrFHhOhld7XBMOUDeXfsIGvYDp"); 
     // console.log(result);
@@ -120,10 +228,39 @@ const Edit = ({ arweave }) => {
     // let key = await arweave.wallets.generate();
     // console.log(key);
 
+    // Check wallet onload
+    const onLoad = async () => {
+      await checkIfWalletIsConnected();
+    };
+    window.addEventListener('load', onLoad);
+    return () => window.removeEventListener('load', onLoad);
+
   }, [])
+
+  const createAccount = async () => {
+    try {
+      const provider = getProvider();
+      const program = new Program(idl, programID, provider);
+      console.log("ping")
+      await program.rpc.initialize({
+        accounts: {
+          baseAccount: baseAccount.publicKey,
+          user: provider.wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [baseAccount]
+      });
+      console.log("Created a new BaseAccount w/ address:", baseAccount.publicKey.toString())
+  
+    } catch(error) {
+      console.log("Error creating BaseAccount account:", error)
+    }
+  }
 
   return (
     <div className="app">
+
+      {/* <button onClick={createAccount}>One time creat account</button> */}
 
       <h1>Edit</h1>
 
@@ -138,9 +275,20 @@ const Edit = ({ arweave }) => {
         :
         <div className="file-upload-container">
           <input type="file" title=" " value="" id="select-files" className="file-upload-input" onChange={selectFiles}/>
-          <button id="upload-button" onClick={() => document.getElementById("select-files").click()}>Drag or select Wallet</button>
+          <button id="upload-button" onClick={() => document.getElementById("select-files").click()}>Select Wallet</button>
         </div>
       }
+    
+      <div>
+      {
+        walletAddress
+        ?
+        <button>Connected</button>
+        :
+        <button onClick={connectWallet}>Connect Wallet</button>
+      }
+      </div>
+      
       <div className="publish-container">
       {
         pubkey
