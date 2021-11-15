@@ -9,15 +9,15 @@
 .gallery-container {
   width: 100%;
   display: flex;
-  justify-content: space-between;
   flex-wrap: wrap;
 }
 
 .story-card {
-  width: 24%;
+  width: 23%;
   margin-bottom: 15px;
   padding: 10px 15px;
   box-sizing: border-box;
+  margin-right: 1%;
 
   border: 1px solid black;
   min-height: 200px;

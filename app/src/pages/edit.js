@@ -121,9 +121,10 @@ const Edit = ({ arweave }) => {
       }
     }
 
+    storyIds.push(transaction.id);
     const newData = { txids: storyIds };
     console.log("newData:", newData);
-    let pointerTransaction = await arweave.createTransaction({ data: JSON.stringify(data) }, key);
+    let pointerTransaction = await arweave.createTransaction({ data: JSON.stringify(newData) }, key);
 
     // // sign transaction
     await arweave.transactions.sign(pointerTransaction, key);
@@ -291,7 +292,7 @@ const Edit = ({ arweave }) => {
       
       <div className="publish-container">
       {
-        pubkey
+        (pubkey && walletAddress)
         ?
         <button onClick={publishStory}>Publish</button>
         :
