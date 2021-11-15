@@ -1,13 +1,12 @@
 
 import '../styles/edit.css';
 import { useState, useEffect } from 'react';
-import Arweave from 'arweave';
 import { Link } from "react-router-dom";
+// import axios from 'axios';
 
-// Since v1.5.1 you're now able to call the init function for the web version without options. The current URL path will be used by default. This is recommended when running from a gateway.
-const arweave = Arweave.init({});
 
-const Edit = () => {
+
+const Edit = ({ arweave }) => {
 
   const [ key, setKey ] = useState(null);
   const [ pubkey, setPubkey ] = useState(null);
@@ -45,6 +44,26 @@ const Edit = () => {
 
     // submit to arweave
     const response = await arweave.transactions.post(transaction);
+    // const headers = {
+    //   'Content-Type': 'application/json',
+    //   'Authorization': 'JWT fefege...'
+    // }
+    
+    // axios.post(Helper.getUserAPI(), data, {
+    //     headers: headers
+    //   })
+    //   .then((response) => {
+    //     dispatch({
+    //       type: FOUND_USER,
+    //       data: response.data[0]
+    //     })
+    //   })
+    //   .catch((error) => {
+    //     dispatch({
+    //       type: ERROR_FINDING_USER
+    //     })
+    //   })
+
 
     // check/wait for status?
     arweave.transactions.getStatus('bNbA3TEQVL60xlgCcqdz4ZPHFZ711cZ3hmkpGttDt_U').then(res => {
@@ -115,17 +134,22 @@ const Edit = () => {
         ?
         <div>
           <p>Logged in: {pubkey}</p>
-          <button onClick={publishStory}>Publish</button>
         </div>
         :
         <div className="file-upload-container">
-          <label>
-            Drag Or Select Wallet
-          </label>
-          <input type="file" id="select-files" className="file-upload-input" onChange={selectFiles}/>
-          <button className="invalid-button">Publish</button>
+          <input type="file" title=" " value="" id="select-files" className="file-upload-input" onChange={selectFiles}/>
+          <button id="upload-button" onClick={() => document.getElementById("select-files").click()}>Drag or select Wallet</button>
         </div>
       }
+      <div className="publish-container">
+      {
+        pubkey
+        ?
+        <button onClick={publishStory}>Publish</button>
+        :
+        <button className="invalid-button">Publish</button>
+      }
+      </div>
 
       <div className="text-editor">
         <input

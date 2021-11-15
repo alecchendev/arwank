@@ -38,8 +38,11 @@ textarea {
   line-height: 1.666;
 }
 
-input[type="file"] {
-  
+input[type="file"] { /* Mask the no file chosen label */
+  display: none;
+  background-color: #fff;
+  content: '';
+  color: white;
 }
 
 p, li, textarea, input[type="text"] {
