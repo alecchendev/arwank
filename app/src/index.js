@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import { Home, Edit } from './pages'
+import { Home, Edit, Story } from './pages'
 
 import {
   BrowserRouter,
@@ -24,6 +24,7 @@ ReactDOM.render(
     <Routes>
       <Route path="/" element={<Home arweave={arweave} />}/>
       <Route path="/edit" element={<Edit arweave={arweave} />}/>
+      <Route path="/story/:storyId" element={<Story arweave={arweave} />}/>
     </Routes>
   </BrowserRouter>,
   document.getElementById('root')
