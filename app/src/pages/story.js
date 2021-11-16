@@ -35,7 +35,12 @@ const opts = {
 
 const Story = ({ arweave }) => {
 
+  const [ baseAccount, setBaseAccount ] = useState();
+  const [ baseAccountBump, setBaseAccountBump ] = useState();
+
   const [ story, setStory ] = useState(null);
+
+  const [ contributors, setContributors ] = useState(null);
 
   const [walletAddress, setWalletAddress] = useState(null);
 
@@ -100,16 +105,46 @@ const Story = ({ arweave }) => {
   };
 
   useEffect(async () => {
+
+    const [ baseAccountTemp, baseAccountBumpTemp ] = await web3.PublicKey.findProgramAddress(
+      [Buffer.from("base_account")],
+      programID
+    );
+    setBaseAccount(baseAccountTemp);
+    setBaseAccountBump(baseAccountBumpTemp);
+
     // Check wallet onload
     const onLoad = async () => {
       await checkIfWalletIsConnected();
     };
     window.addEventListener('load', onLoad);
 
-    // load story data
     const dataStr = await arweave.transactions.getData(storyId, {decode: true, string: true});
     const data = JSON.parse(dataStr);
     setStory(data);
+
+    // get contributors
+    const provider = getProvider();
+    const program = new Program(idl, programID, provider);
+    try {
+
+      const [ currStoryAccount, currStoryAccountBump ] = await web3.PublicKey.findProgramAddress(
+        [Buffer.from(storyId.slice(0, 30))],
+        programID
+      );
+
+      let storyAccount = await program.account.storyAccount.fetch(currStoryAccount);
+      const contribPointer = storyAccount.pointer.toString();
+
+      const dataStr = await arweave.transactions.getData(contribPointer, {decode: true, string: true});
+      const data = JSON.parse(dataStr);
+      // contribAddrs = data.contribAddrs;
+      setContributors(data.contribAddrs);
+
+    } catch (err) {
+      console.log(err);
+      setContributors([]);
+    }
   }, [])
 
   return (
@@ -132,6 +167,16 @@ const Story = ({ arweave }) => {
         story
         ?
         <div className="story-container">
+          {
+            contributors === null
+            ?
+            <p>Loading contributors...</p>
+            :
+            <div>
+              <h3>Contributors:</h3>
+              {contributors.map((addr) => <p>{addr}</p>)}
+            </div>
+          }
           <h2>{story.title}</h2>
           <p>{story.content}</p>
         </div>

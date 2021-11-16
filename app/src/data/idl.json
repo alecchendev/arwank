@@ -1,60 +1,128 @@
 {
-    "version": "0.0.0",
-    "name": "arwank",
-    "instructions": [
-      {
-        "name": "initialize",
-        "accounts": [
-          {
-            "name": "baseAccount",
-            "isMut": true,
-            "isSigner": true
-          },
-          {
-            "name": "user",
-            "isMut": true,
-            "isSigner": true
-          },
-          {
-            "name": "systemProgram",
-            "isMut": false,
-            "isSigner": false
-          }
-        ],
-        "args": []
-      },
-      {
-        "name": "setPointer",
-        "accounts": [
-          {
-            "name": "baseAccount",
-            "isMut": true,
-            "isSigner": false
-          }
-        ],
-        "args": [
+  "version": "0.0.0",
+  "name": "arwank",
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [
+        {
+          "name": "baseAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "baseAccountBump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "setPointer",
+      "accounts": [
+        {
+          "name": "baseAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "data",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "publish",
+      "accounts": [
+        {
+          "name": "storyAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "baseAccount",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "storyAccountBump",
+          "type": "u8"
+        },
+        {
+          "name": "storyPointer",
+          "type": "string"
+        },
+        {
+          "name": "contribPointer",
+          "type": "string"
+        },
+        {
+          "name": "newData",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "BaseAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
           {
             "name": "data",
             "type": "string"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }
-    ],
-    "accounts": [
-      {
-        "name": "BaseAccount",
-        "type": {
-          "kind": "struct",
-          "fields": [
-            {
-              "name": "data",
-              "type": "string"
-            }
-          ]
-        }
+    },
+    {
+      "name": "StoryAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pointer",
+            "type": "string"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
       }
-    ],
-    "metadata": {
-      "address": "4drqYMg65f9Rwy8fZPFqZY8EKT5vASG9UDShizaym9MS"
     }
+  ],
+  "metadata": {
+    "address": "4drqYMg65f9Rwy8fZPFqZY8EKT5vASG9UDShizaym9MS"
   }
+}

@@ -14,7 +14,14 @@ A collaborative blogging platform using Arweave.
 - [x] Have gallery use pointer from contract
 - [x] Implement story page
 - [x] Allow editing off of others
-- [ ] Store contriutors for each story
+- [ ] Store contributors for each story
+    - [x] Change current contract to PDA
+    - Change contract to enable new storage through PDAs
+    - Change frontend to
+        1. create/(get + add) to list of contributors
+        2. publish that to arweave
+        3. create an account for that transaction with pointer to that list
+- [ ] Tip contributors button as pre-nft functionality
 - [ ] Include preview metadata in pointer
 - [ ] Move wallet login to global state
 - [ ] Style

@@ -45,7 +45,7 @@ input[type="file"] { /* Mask the no file chosen label */
   color: white;
 }
 
-p, li, textarea, input[type="text"] {
+p, li, textarea {
   font-family: Work sans, sans-serif;
 }
 

@@ -15,9 +15,9 @@ import kp from '../data/keypair.json'
 const { SystemProgram, Keypair } = web3;
 
 // Create a keypair for the account that will hold the GIF data.
-const arr = Object.values(kp._keypair.secretKey);
-const secret = new Uint8Array(arr);
-const baseAccount = web3.Keypair.fromSecretKey(secret);
+// const arr = Object.values(kp._keypair.secretKey);
+// const secret = new Uint8Array(arr);
+// const baseAccount = web3.Keypair.fromSecretKey(secret);
 // const baseAccount = web3.Keypair.generate();
 
 // Get our program's id form the IDL file.
@@ -33,6 +33,9 @@ const opts = {
 }
 
 const Home = ({ arweave }) => {
+
+  const [ baseAccount, setBaseAccount ] = useState();
+  const [ baseAccountBump, setBaseAccountBump ] = useState();
 
   const [ txids, setTxids ] = useState(['Gw9amRZUgcvJ3qttddDzoFaabcEMvR2ySptthzlEsIU']);
   const [ stories, setStories ] = useState(null);
@@ -98,6 +101,14 @@ const Home = ({ arweave }) => {
   };
 
   useEffect(async () => {
+
+    const [ baseAccountTemp, baseAccountBumpTemp ] = await web3.PublicKey.findProgramAddress(
+      [Buffer.from("base_account")],
+      programID
+    );
+    setBaseAccount(baseAccountTemp);
+    setBaseAccountBump(baseAccountBumpTemp);
+
     // Check wallet onload
     const onLoad = async () => {
       await checkIfWalletIsConnected();
@@ -107,7 +118,7 @@ const Home = ({ arweave }) => {
     // get pointer
     const provider = getProvider();
     const program = new Program(idl, programID, provider);
-    let account = await program.account.baseAccount.fetch(baseAccount.publicKey);
+    let account = await program.account.baseAccount.fetch(baseAccountTemp);
     const pointer = account.data.toString();
     console.log('Pointer:', account.data.toString());
 

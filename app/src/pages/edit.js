@@ -10,18 +10,20 @@ import {
   Program, Provider, web3
 } from '@project-serum/anchor';
 import kp from '../data/keypair.json'
+import { BN } from 'bn.js';
 
 // SystemProgram is a reference to the Solana runtime!
 const { SystemProgram, Keypair } = web3;
 
-// Create a keypair for the account that will hold the GIF data.
-const arr = Object.values(kp._keypair.secretKey);
-const secret = new Uint8Array(arr);
-const baseAccount = web3.Keypair.fromSecretKey(secret);
-// const baseAccount = web3.Keypair.generate();
 
 // Get our program's id form the IDL file.
 const programID = new PublicKey(idl.metadata.address);
+
+// Create a keypair for the account that will hold the GIF data.
+// const arr = Object.values(kp._keypair.secretKey);
+// const secret = new Uint8Array(arr);
+// const baseAccount = web3.Keypair.fromSecretKey(secret);
+// const baseAccount = web3.Keypair.generate();
 
 // Set our network to devent.
 const network = clusterApiUrl('devnet');
@@ -35,6 +37,9 @@ const opts = {
 
 const Edit = ({ arweave }) => {
 
+  const [ baseAccount, setBaseAccount ] = useState();
+  const [ baseAccountBump, setBaseAccountBump ] = useState();
+
   const [ key, setKey ] = useState(null);
   const [ pubkey, setPubkey ] = useState(null);
   const [ text, setText ] = useState("");
@@ -43,6 +48,8 @@ const Edit = ({ arweave }) => {
   const [walletAddress, setWalletAddress] = useState(null);
 
   const [ story, setStory ] = useState(null);
+
+  const [ published, setPublished ] = useState(false);
 
   const { storyId } = useParams();
 
@@ -109,8 +116,8 @@ const Edit = ({ arweave }) => {
     const provider = getProvider();
     const program = new Program(idl, programID, provider);
 
-    let account = await program.account.baseAccount.fetch(baseAccount.publicKey);
-    const pointer = account.data.toString();
+    let account = await program.account.baseAccount.fetch(baseAccount);
+    const pointer = account.data.toString(); // change to convert from u8 array
     console.log('Pointer: ', account.data.toString());
 
     let storyIds = [];
@@ -138,13 +145,69 @@ const Edit = ({ arweave }) => {
     let pointerResponse = await arweave.transactions.post(pointerTransaction);
     console.log("pointerResponse:", pointerResponse);
 
+    // update gallery pointer
     const newPointer = pointerTransaction.id;
     console.log("newPointer:", newPointer);
-    await program.rpc.setPointer(newPointer, {
+    // await program.rpc.setPointer(newPointer, {
+    //   accounts: {
+    //     baseAccount: baseAccount,
+    //   },
+    // });
+    
+    let contribAddrs = [];
+    // if (story && story !== "New" && story.contribTxid) {
+    if (storyId) {
+      // use array from transaction
+      try {
+        const [ currStoryAccount, currStoryAccountBump ] = await web3.PublicKey.findProgramAddress(
+          [Buffer.from(storyId.slice(0, 30))],
+          programID
+        );
+
+        let storyAccount = await program.account.storyAccount.fetch(currStoryAccount);
+        const contribPointer = storyAccount.pointer.toString();
+
+        const dataStr = await arweave.transactions.getData(contribPointer, {decode: true, string: true});
+        const data = JSON.parse(dataStr);
+        contribAddrs = data.contribAddrs;
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    
+    // submit contributors
+    contribAddrs.push(pubkey);
+    const newContribData = { contribAddrs: contribAddrs };
+    console.log("newContribTxid:", newContribData);
+    let contribTx = await arweave.createTransaction({ data: JSON.stringify(newContribData) }, key);
+
+    // // sign transaction
+    await arweave.transactions.sign(contribTx, key);
+    console.log("pointerTransaction", contribTx);
+
+    // submit to arweave
+    let contribResponse = await arweave.transactions.post(contribTx);
+    console.log("contribResponse:", contribResponse);
+
+    // publish 
+    // 1 update gallery pointer
+    // 2 create account for transaction with contrib pointer
+    const [storyAccount, storyAccountBump] = await web3.PublicKey.findProgramAddress(
+      [Buffer.from(transaction.id.slice(0, 30))],
+      programID
+    )
+    let pubTx = await program.rpc.publish(new BN(storyAccountBump), transaction.id.slice(0, 30), contribTx.id, newPointer, {
       accounts: {
-        baseAccount: baseAccount.publicKey,
-      },
+        // baseAccount: baseAccount.publicKey,
+        storyAccount: storyAccount,
+        user: provider.wallet.publicKey,
+        systemProgram: SystemProgram.programId,
+        baseAccount: baseAccount,
+      }
     });
+
+    setPublished(true);
+
   }
 
   const selectFiles = () => {
@@ -233,6 +296,13 @@ const Edit = ({ arweave }) => {
     // let key = await arweave.wallets.generate();
     // console.log(key);
 
+    const [ baseAccountTemp, baseAccountBumpTemp ] = await web3.PublicKey.findProgramAddress(
+      [Buffer.from("base_account")],
+      programID
+    );
+    setBaseAccount(baseAccountTemp);
+    setBaseAccountBump(baseAccountBumpTemp);
+
     // Check wallet onload
     const onLoad = async () => {
       await checkIfWalletIsConnected();
@@ -262,15 +332,14 @@ const Edit = ({ arweave }) => {
       const provider = getProvider();
       const program = new Program(idl, programID, provider);
       console.log("ping")
-      await program.rpc.initialize({
+      await program.rpc.initialize(new BN(baseAccountBump), {
         accounts: {
-          baseAccount: baseAccount.publicKey,
+          baseAccount: baseAccount,
           user: provider.wallet.publicKey,
           systemProgram: SystemProgram.programId,
         },
-        signers: [baseAccount]
       });
-      console.log("Created a new BaseAccount w/ address:", baseAccount.publicKey.toString())
+      console.log("Created a new BaseAccount w/ address:", baseAccount.toString())
   
     } catch(error) {
       console.log("Error creating BaseAccount account:", error)
@@ -311,13 +380,19 @@ const Edit = ({ arweave }) => {
       
       <div className="publish-container">
       {
-        (pubkey && walletAddress)
+        (pubkey && walletAddress && !published)
         ?
         <button onClick={publishStory}>Publish</button>
         :
         <button className="invalid-button">Publish</button>
       }
       </div>
+
+      {
+        published
+        &&
+        <p>Published</p>
+      }
 
 
       <div className="text-editor">
