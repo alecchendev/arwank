@@ -12,9 +12,12 @@ A collaborative blogging platform using Arweave.
 - [x] When publish, change contract
 - [x] Build contract to set pointer
 - [x] Have gallery use pointer from contract
-- [ ] Implement story page
+- [x] Implement story page
+- [x] Allow editing off of others
+- [ ] Store contriutors for each story
+- [ ] Include preview metadata in pointer
 - [ ] Move wallet login to global state
-- [ ] Allow editing off of others
 - [ ] Style
 - [ ] Don't hold entirety of story data in memory?
 - [ ] Minting NFTs! -> compensate history of contributors
+- [ ] Redesign architecture - validate txids

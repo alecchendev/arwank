@@ -143,7 +143,7 @@ const Home = ({ arweave }) => {
     <div className="app">
 
       <h1>Hello Arweave!</h1>
-      <Link to="/edit">Edit</Link>
+      <Link to="/edit">Create</Link>
 
       <div>
       {

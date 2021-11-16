@@ -5,6 +5,7 @@
 
 .title-input {
     border: none;
+    padding: 0;
     width: 100%;
 
     font-family: "Roboto Mono", monospace;
@@ -14,6 +15,7 @@
 
 .text-input {
     border: none;
+    padding: 0;
     width: 100%;
 
     font-size: 1.2rem;
@@ -21,4 +23,9 @@
 
 .file-upload-label {
     margin-right: 15px;
+}
+
+.prev-story-container {
+  color: gray;
+  font-size: 1.2rem;
 }

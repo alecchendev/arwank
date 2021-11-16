@@ -24,6 +24,7 @@ ReactDOM.render(
     <Routes>
       <Route path="/" element={<Home arweave={arweave} />}/>
       <Route path="/edit" element={<Edit arweave={arweave} />}/>
+      <Route path="/edit/:storyId" element={<Edit arweave={arweave} />}/>
       <Route path="/story/:storyId" element={<Story arweave={arweave} />}/>
     </Routes>
   </BrowserRouter>,

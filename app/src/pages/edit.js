@@ -1,7 +1,7 @@
 
 import '../styles/edit.css';
 import { useState, useEffect } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 // import axios from 'axios';
 import idl from '../data/idl.json';
 
@@ -42,6 +42,10 @@ const Edit = ({ arweave }) => {
 
   const [walletAddress, setWalletAddress] = useState(null);
 
+  const [ story, setStory ] = useState(null);
+
+  const { storyId } = useParams();
+
   const getProvider = () => {
     const connection = new Connection(network, opts.preflightCommitment);
     const provider = new Provider(
@@ -68,7 +72,7 @@ const Edit = ({ arweave }) => {
     const data = {
 
       title: title,
-      content: text
+      content: ((story && story !== "New") ? (story.content + ' ') : '') + text,
     }
 
     // base64 encode
@@ -234,7 +238,22 @@ const Edit = ({ arweave }) => {
       await checkIfWalletIsConnected();
     };
     window.addEventListener('load', onLoad);
-    return () => window.removeEventListener('load', onLoad);
+    window.removeEventListener('load', onLoad);
+
+    // load story data
+    if (storyId === undefined) {
+      setStory("New");
+    } else {
+      try {
+        const dataStr = await arweave.transactions.getData(storyId, {decode: true, string: true});
+        const data = JSON.parse(dataStr);
+        setStory(data);
+        setTitle(data.title);
+      } catch (err) {
+        console.log(err);
+        setStory("New");
+      }
+    }
 
   }, [])
 
@@ -300,6 +319,7 @@ const Edit = ({ arweave }) => {
       }
       </div>
 
+
       <div className="text-editor">
         <input
           type="text"
@@ -308,12 +328,27 @@ const Edit = ({ arweave }) => {
           placeholder={"Type your title here..."}
           onChange={updateTitle}
         />
+
+        {
+          story
+          ?
+          (
+            story !== "New"
+            &&
+            <div className="prev-story-container">
+              <p>{story.content}</p>
+            </div>
+          )
+          :
+          <p>Loading...</p>
+        }
+
         <textarea
           // type="text"
           id="textarea"
           className="text-input"
           value={text}
-          placeholder={"Type your story here..."}
+          placeholder={(story && story !== "New") ? "Add your contribution here..." : "Type your story here..."}
           onChange={updateText}
         />
       </div>

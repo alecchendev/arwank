@@ -116,7 +116,7 @@ const Story = ({ arweave }) => {
     <div className="app">
 
       <Link to="/">Home</Link>
-      <Link to="/edit">Edit</Link>
+      <Link to={"/edit/" + storyId}>Edit</Link>
 
       <div>
       {
