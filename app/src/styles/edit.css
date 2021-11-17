@@ -1,6 +1,6 @@
 
 .text-editor {
-    margin-top: 50px;
+    margin-top: 0px;
 }
 
 .title-input {
@@ -19,7 +19,7 @@
     padding: 0;
     width: 100%;
 
-    font-size: 1.2rem;
+    font-size: 1.1rem;
 }
 
 .file-upload-label {
@@ -28,7 +28,7 @@
 
 .prev-story-container {
   color: gray;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
 .highlight {

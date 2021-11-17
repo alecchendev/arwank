@@ -1,6 +1,6 @@
 
 
-import '../styles/home.css';
+import '../styles/story.css';
 import { useState, useEffect } from 'react';
 import { Link, useParams } from "react-router-dom";
 
@@ -129,46 +129,70 @@ const Story = ({ arweave }) => {
   }, [])
 
   return (
-    <div className="app">
+    <div className="app app-wide">
 
-      <Link to="/">Home</Link>
-      <Link to={"/edit/" + storyId}>Edit</Link>
-
-      <div>
-      {
-        walletAddress
-        ?
-        <button>Connected</button>
-        :
-        <button onClick={connectWallet}>Connect Wallet</button>
-      }
+      <div className="top-bar">
+        <Link to="/"><h1>Arwank</h1></Link>
       </div>
 
-      {
-        story
-        ?
+      <div className="story-mint-container">
+
         <div className="story-container">
           {
-            contributors === null
+            story
             ?
-            <p>Loading contributors...</p>
-            :
             <div>
-              <h3>Contributors:</h3>
-              {Object.entries(contributors).map(([index, addr]) => <p className={hoveringContributor === (addr + index) ? "highlight" : ""} onMouseEnter={() => setHoveringContributor(addr + index)}
-            onMouseLeave={() => setHoveringContributor("")}>{addr}</p>)}
+              <h2>{story.title}</h2>
+              {
+                Object.entries(story.content).map(([index, section]) => {
+                  return (<p className={hoveringContributor === (section.contributor + index) ? "highlight" : ""} onMouseEnter={() => setHoveringContributor(section.contributor + index)} onMouseLeave={() => setHoveringContributor("")}>{section.text}</p>)
+                })
+              }
             </div>
+            :
+            <p>Loading...</p>
           }
-          <h2>{story.title}</h2>
-          {
-            Object.entries(story.content).map(([index, section]) => {
-              return (<p className={hoveringContributor === (section.contributor + index) ? "highlight" : ""} onMouseEnter={() => setHoveringContributor(section.contributor + index)} onMouseLeave={() => setHoveringContributor("")}>{section.text}</p>)
-            })
-          }
+
         </div>
-        :
-        <p>Loading...</p>
-      }
+
+        <div className="mint-contributors-container">
+
+          <div className="mint-edit-container">
+          {
+            walletAddress
+            ?
+            <button>Connected</button>
+            :
+            <button onClick={connectWallet}>Connect Wallet to Mint</button>
+          }
+            <div className="edit-button-container">
+              <Link to={"/edit/" + storyId}><button>Edit</button></Link>
+            </div>
+          </div>
+
+          {
+            story
+            ?
+            <div>
+              {
+                contributors === null
+                ?
+                <p>Loading contributors...</p>
+                :
+                <div>
+                  <h3>Contributors:</h3>
+                  {Object.entries(contributors).map(([index, addr]) => <p className={hoveringContributor === (addr + index) ? "highlight" : ""} onMouseEnter={() => setHoveringContributor(addr + index)}
+                onMouseLeave={() => setHoveringContributor("")}>{addr}</p>)}
+                </div>
+              }
+            </div>
+            :
+            <p>Loading...</p>
+          }
+
+        </div>
+
+      </div>
       
     </div>
   );

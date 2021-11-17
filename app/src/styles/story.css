@@ -1,0 +1,46 @@
+
+.app-wide {
+  width: 900px;
+}
+
+.story-mint-container {
+  display: flex;
+}
+
+.story-container {
+  width: 65%;
+  padding-right: 25px;
+}
+
+.mint-contributors-container {
+  width: 35%;
+  padding-top: 25px;
+  overflow-wrap: break-word;
+}
+
+.mint-edit-container {
+  display: flex;
+}
+
+.edit-button-container {
+  margin-left: 15px;
+}
+
+@media (max-width: 800px) {
+  .app-wide {
+    width: 95%;
+  }
+
+  .story-mint-container {
+    flex-direction: column-reverse;
+  }
+
+  .story-container {
+    width: 100%;
+  }
+
+  .mint-contributors-container {
+    width: 100%;
+  }
+
+}

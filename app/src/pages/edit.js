@@ -1,7 +1,7 @@
 
 import '../styles/edit.css';
 import { useState, useEffect } from 'react';
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 // import axios from 'axios';
 import idl from '../data/idl.json';
 
@@ -11,6 +11,7 @@ import {
 } from '@project-serum/anchor';
 import kp from '../data/keypair.json'
 import { BN } from 'bn.js';
+import { TransactionUploader } from 'arweave/node/lib/transaction-uploader';
 
 // SystemProgram is a reference to the Solana runtime!
 const { SystemProgram, Keypair } = web3;
@@ -52,6 +53,7 @@ const Edit = ({ arweave }) => {
   const [ published, setPublished ] = useState(false);
 
   const { storyId } = useParams();
+  const navigate = useNavigate();
 
   const getProvider = () => {
     const connection = new Connection(network, opts.preflightCommitment);
@@ -74,6 +76,10 @@ const Edit = ({ arweave }) => {
   }
 
   const publishStory = async () => {
+
+    if (title === "" || text === "") return;
+
+    setPublished("publishing");
     console.log("Publishing...");
 
     // NEW FORMAT
@@ -107,11 +113,12 @@ const Edit = ({ arweave }) => {
 
       setPublished(true);
       setText("");
+      navigate("/story/" + transaction.id);
 
     } catch (err) {
 
       console.log("Publish failed:", err);
-      setPublished(null);
+      setPublished(false);
 
     }
 
@@ -258,49 +265,47 @@ const Edit = ({ arweave }) => {
 
       {/* <button onClick={createAccount}>One time creat account</button> */}
 
-      <h1>Edit</h1>
-
-      <Link to="/">Home</Link>
+      <div className="top-bar">
+        <Link to="/"><h1>Arwank</h1></Link>
+        <div className="button-container">
+          <div className="publish-container">
+            {
+              pubkey
+              ?
+              (
+                !published
+                ?
+                <div>
+                  <button onClick={publishStory}>Publish</button>
+                </div>
+                :
+                (published === "publishing")
+                ?
+                <div>
+                  <button>Publishing...</button>
+                </div>
+                :
+                <div>
+                  <button>Published!</button>
+                </div>
+              )
+              :
+              <div className="file-upload-container">
+                <input type="file" title=" " value="" id="select-files" className="file-upload-input" onChange={selectFiles}/>
+                <button id="upload-button" onClick={() => document.getElementById("select-files").click()}>Select Wallet to Publish</button>
+              </div>
+            }
+            </div>
+        </div>
+      </div>
 
       {
         pubkey
-        ?
-        <div>
-          <p>Logged in: {pubkey}</p>
-        </div>
-        :
-        <div className="file-upload-container">
-          <input type="file" title=" " value="" id="select-files" className="file-upload-input" onChange={selectFiles}/>
-          <button id="upload-button" onClick={() => document.getElementById("select-files").click()}>Select Wallet</button>
-        </div>
-      }
-    
-      <div>
-      {
-        walletAddress
-        ?
-        <button>Connected</button>
-        :
-        <button onClick={connectWallet}>Connect Wallet</button>
-      }
-      </div>
-      
-      <div className="publish-container">
-      {
-        (pubkey && walletAddress && !published)
-        ?
-        <button onClick={publishStory}>Publish</button>
-        :
-        <button className="invalid-button">Publish</button>
-      }
-      </div>
-
-      {
-        published
         &&
-        <p>Published</p>
+        <p>Logged in: {pubkey}</p>
       }
 
+      <h2>Edit</h2>
 
       <div className="text-editor">
         <input
@@ -333,8 +338,6 @@ const Edit = ({ arweave }) => {
         />
       </div>
 
-
-      
     </div>
   );
 }

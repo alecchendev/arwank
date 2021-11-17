@@ -170,29 +170,32 @@ const Home = ({ arweave }) => {
   return (
     <div className="app">
 
-      <h1>Hello Arweave!</h1>
-      <Link to="/edit">Create</Link>
-
-      <div>
-      {
-        walletAddress
-        ?
-        <button>Connected</button>
-        :
-        <button onClick={connectWallet}>Connect Wallet</button>
-      }
+      <div className="top-bar">
+        <Link to="/"><h1>Arwank</h1></Link>
+        <div className="button-container">
+          <Link to="/edit"><button>Create</button></Link>
+        </div>
       </div>
 
-      <h2>Gallery</h2>
+      <p>
+        Arwank is a collaborative blogging platform, where you can fork other people's
+        writing to create community-made pieces.
+      </p>
+      <p>
+        You can mint and purchase any piece as an NFT, and the money will go to everyone who contributed
+        to that piece.
+      </p>
+
+      <h2>Explore</h2>
       {
         stories
         ?
         <div className="gallery-container">
           {stories.map((story) => (
             <div className="story-card">
-                <h4>{story.title}</h4>
-                <p>By: {story.contributors[0]}</p>
-                <p>{story.content.length > 0 && (story.content[0].text.slice(0, 25) + "...")}</p>
+                <h3>{story.title}</h3>
+                <p>By: {story.contributors[0].slice(0, 12) + "..."}</p>
+                <p>{story.content.length > 0 && (story.content[0].text.slice(0, 50) + "...")}</p>
                 <Link to={"/story/" + story.txid}>Go to story</Link>
             </div>
           ))
