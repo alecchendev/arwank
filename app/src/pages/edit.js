@@ -75,138 +75,41 @@ const Edit = ({ arweave }) => {
 
   const publishStory = async () => {
     console.log("Publishing...");
-    // form story data as JSON
-    const data = {
 
+    // NEW FORMAT
+    let contributors = [];
+    let content = [];
+    const tags = ["arwankv0.0.1", "arwankStory"]
+    if (story && story != "New") {
+      contributors = story.contributors;
+      content = story.content;
+    } else {
+
+    }
+    contributors.unshift(pubkey);
+    content.push({ contributor: pubkey, text: text })
+    const storyData = {
       title: title,
-      content: ((story && story !== "New") ? (story.content + ' ') : '') + text,
+      contributors: contributors,
+      content: content,
+    };
+
+    console.log("storyData:", storyData);
+
+    try {
+
+      let transaction = await arweave.createTransaction({ data: JSON.stringify(storyData) }, key);
+      await arweave.transactions.sign(transaction, key);
+      const response = await arweave.transactions.post(transaction);
+
+      setPublished(true);
+
+    } catch (err) {
+
+      console.log("Publish failed:", err);
+      setPublished(null);
+
     }
-
-    // base64 encode
-
-    // create transaction
-    let transaction = await arweave.createTransaction({ data: JSON.stringify(data) }, key);
-
-    // sign transaction
-    await arweave.transactions.sign(transaction, key);
-
-    // submit to arweave
-    const response = await arweave.transactions.post(transaction);
-
-
-    // check/wait for status?
-    // arweave.transactions.getStatus('bNbA3TEQVL60xlgCcqdz4ZPHFZ711cZ3hmkpGttDt_U').then(res => {
-    //   console.log(res);
-    //   // {
-    //   //  status: 200,
-    //   //  confirmed: {
-    //   //    block_height: 140151,
-    //   //    block_indep_hash: 'OR1wue3oBSg3XWvH0GBlauAtAjBICVs2F_8YLYQ3aoAR7q6_3fFeuBOw7d-JTEdR',
-    //   //    number_of_confirmations: 20
-    //   //  }
-    //   //}
-    // })
-
-    console.log("transaction:", transaction);
-    console.log("response:", response);
-
-    console.log("Published.");
-
-    // smart contract part
-    const provider = getProvider();
-    const program = new Program(idl, programID, provider);
-
-    let account = await program.account.baseAccount.fetch(baseAccount);
-    const pointer = account.data.toString(); // change to convert from u8 array
-    console.log('Pointer: ', account.data.toString());
-
-    let storyIds = [];
-    if (pointer !== '') {
-      // use array from transaction
-      try {
-        const dataStr = await arweave.transactions.getData(pointer, {decode: true, string: true});
-        const data = JSON.parse(dataStr);
-        storyIds = data.txids;
-      } catch (err) {
-        console.log(err);
-      }
-    }
-
-    storyIds.push(transaction.id);
-    const newData = { txids: storyIds };
-    console.log("newData:", newData);
-    let pointerTransaction = await arweave.createTransaction({ data: JSON.stringify(newData) }, key);
-
-    // // sign transaction
-    await arweave.transactions.sign(pointerTransaction, key);
-    console.log("pointerTransaction", pointerTransaction);
-
-    // submit to arweave
-    let pointerResponse = await arweave.transactions.post(pointerTransaction);
-    console.log("pointerResponse:", pointerResponse);
-
-    // update gallery pointer
-    const newPointer = pointerTransaction.id;
-    console.log("newPointer:", newPointer);
-    // await program.rpc.setPointer(newPointer, {
-    //   accounts: {
-    //     baseAccount: baseAccount,
-    //   },
-    // });
-    
-    let contribAddrs = [];
-    // if (story && story !== "New" && story.contribTxid) {
-    if (storyId) {
-      // use array from transaction
-      try {
-        const [ currStoryAccount, currStoryAccountBump ] = await web3.PublicKey.findProgramAddress(
-          [Buffer.from(storyId.slice(0, 30))],
-          programID
-        );
-
-        let storyAccount = await program.account.storyAccount.fetch(currStoryAccount);
-        const contribPointer = storyAccount.pointer.toString();
-
-        const dataStr = await arweave.transactions.getData(contribPointer, {decode: true, string: true});
-        const data = JSON.parse(dataStr);
-        contribAddrs = data.contribAddrs;
-      } catch (err) {
-        console.log(err);
-      }
-    }
-    
-    // submit contributors
-    contribAddrs.push(pubkey);
-    const newContribData = { contribAddrs: contribAddrs };
-    console.log("newContribTxid:", newContribData);
-    let contribTx = await arweave.createTransaction({ data: JSON.stringify(newContribData) }, key);
-
-    // // sign transaction
-    await arweave.transactions.sign(contribTx, key);
-    console.log("pointerTransaction", contribTx);
-
-    // submit to arweave
-    let contribResponse = await arweave.transactions.post(contribTx);
-    console.log("contribResponse:", contribResponse);
-
-    // publish 
-    // 1 update gallery pointer
-    // 2 create account for transaction with contrib pointer
-    const [storyAccount, storyAccountBump] = await web3.PublicKey.findProgramAddress(
-      [Buffer.from(transaction.id.slice(0, 30))],
-      programID
-    )
-    let pubTx = await program.rpc.publish(new BN(storyAccountBump), transaction.id.slice(0, 30), contribTx.id, newPointer, {
-      accounts: {
-        // baseAccount: baseAccount.publicKey,
-        storyAccount: storyAccount,
-        user: provider.wallet.publicKey,
-        systemProgram: SystemProgram.programId,
-        baseAccount: baseAccount,
-      }
-    });
-
-    setPublished(true);
 
   }
 
