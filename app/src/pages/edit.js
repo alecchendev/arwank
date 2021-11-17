@@ -45,7 +45,7 @@ const Edit = ({ arweave }) => {
   const [ text, setText ] = useState("");
   const [ title, setTitle ] = useState("");
 
-  const [walletAddress, setWalletAddress] = useState(null);
+  const [ walletAddress, setWalletAddress ] = useState(null);
 
   const [ story, setStory ] = useState(null);
 
@@ -106,6 +106,7 @@ const Edit = ({ arweave }) => {
       const response = await arweave.transactions.post(transaction);
 
       setPublished(true);
+      setText("");
 
     } catch (err) {
 
@@ -316,9 +317,7 @@ const Edit = ({ arweave }) => {
           (
             story !== "New"
             &&
-            <div className="prev-story-container">
-              <p>{story.content}</p>
-            </div>
+            story.content.map((section) => <p>{section.text}</p>)
           )
           :
           <p>Loading...</p>

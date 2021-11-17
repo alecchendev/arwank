@@ -121,30 +121,9 @@ const Story = ({ arweave }) => {
 
     const dataStr = await arweave.transactions.getData(storyId, {decode: true, string: true});
     const data = JSON.parse(dataStr);
+    console.log(data);
     setStory(data);
-
-    // get contributors
-    const provider = getProvider();
-    const program = new Program(idl, programID, provider);
-    try {
-
-      const [ currStoryAccount, currStoryAccountBump ] = await web3.PublicKey.findProgramAddress(
-        [Buffer.from(storyId.slice(0, 30))],
-        programID
-      );
-
-      let storyAccount = await program.account.storyAccount.fetch(currStoryAccount);
-      const contribPointer = storyAccount.pointer.toString();
-
-      const dataStr = await arweave.transactions.getData(contribPointer, {decode: true, string: true});
-      const data = JSON.parse(dataStr);
-      // contribAddrs = data.contribAddrs;
-      setContributors(data.contribAddrs);
-
-    } catch (err) {
-      console.log(err);
-      setContributors([]);
-    }
+    setContributors(data.contributors); 
   }, [])
 
   return (
@@ -178,7 +157,9 @@ const Story = ({ arweave }) => {
             </div>
           }
           <h2>{story.title}</h2>
-          <p>{story.content}</p>
+          {
+            story.content.map((section) => <p>{section.text}</p>)
+          }
         </div>
         :
         <p>Loading...</p>

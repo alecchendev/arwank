@@ -155,6 +155,7 @@ const Home = ({ arweave }) => {
         const txdata = await arweave.transactions.getData(txid, { decode: true, string: true });
         console.log(txdata);
         const data = JSON.parse(txdata);
+        data.txid = txid;
         newStories.push(data);
 
       }
