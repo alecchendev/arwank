@@ -99,6 +99,9 @@ const Edit = ({ arweave }) => {
     try {
 
       let transaction = await arweave.createTransaction({ data: JSON.stringify(storyData) }, key);
+      transaction.addTag("App-Name", "arwank");
+      transaction.addTag("App-Version", "0.0.1");
+      transaction.addTag('Type', 'story')
       await arweave.transactions.sign(transaction, key);
       const response = await arweave.transactions.post(transaction);
 

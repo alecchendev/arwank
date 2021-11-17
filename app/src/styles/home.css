@@ -18,6 +18,7 @@
   padding: 10px 15px;
   box-sizing: border-box;
   margin-right: 1%;
+  overflow-wrap: break-word;
 
   border: 1px solid black;
   min-height: 200px;

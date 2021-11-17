@@ -122,32 +122,49 @@ const Home = ({ arweave }) => {
     const pointer = account.data.toString();
     console.log('Pointer:', account.data.toString());
 
-    // get data from that pointer
-    // const result = await arweave.blocks.get("zbUPQFA4ybnd8h99KI9Iqh4mogXJibr0syEwuJPrFHhOhld7XBMOUDeXfsIGvYDp"); 
-    // console.log(result);
-    let storyIds = [];
-    if (pointer !== '') {
-      // use array from transaction
-      console.log("")
-      try {
-        const dataStr = await arweave.transactions.getData(pointer, {decode: true, string: true});
-        console.log("dataStr:", dataStr);
-        const data = JSON.parse(dataStr);
-        storyIds = data.txids;
-      } catch (err) {
-        console.log(err);
+    // new get using arql
+    const query = {
+      op: "and",
+      expr1: {
+        op: "and",
+        expr1: {
+          op: 'equals',
+          expr1: 'App-Name',
+          expr2: 'arwank'
+        },
+        expr2: {
+          op: 'equals',
+          expr1: 'App-Version',
+          expr2: '0.0.1'
+        }
+      },
+      expr2: {
+        op: "equals",
+        expr1: "Type",
+        expr2: "story",
       }
+    };
+
+    try {
+
+      const queryRes = await arweave.api.post(`arql`, query);
+      console.log("queryRes:", queryRes);
+      const newStories = [];
+      for (let i = 0; i < queryRes.data.length; i += 1) {
+        const txid = queryRes.data[i];
+        const txdata = await arweave.transactions.getData(txid, { decode: true, string: true });
+        console.log(txdata);
+        const data = JSON.parse(txdata);
+        newStories.push(data);
+
+      }
+      setStories(newStories);
+
+    } catch (err) {
+      console.log("query err:", err);
     }
 
-    let newStories = [];
-    for (let i = 0; i < storyIds.length; i++) {
-      const data = await arweave.transactions.getData(storyIds[i], {decode: true, string: true});
-      console.log(data);
-      const json = JSON.parse(data);
-      json.txid = storyIds[i];
-      newStories.push(json);
-    }
-    setStories(newStories);
+    
   }, [])
 
   return (
@@ -174,7 +191,8 @@ const Home = ({ arweave }) => {
           {stories.map((story) => (
             <div className="story-card">
                 <h4>{story.title}</h4>
-                <p>{story.content.slice(0, 25) + "..."}</p>
+                <p>By: {story.contributors[0]}</p>
+                <p>{story.content.length > 0 && (story.content[0].text.slice(0, 25) + "...")}</p>
                 <Link to={"/story/" + story.txid}>Go to story</Link>
             </div>
           ))
