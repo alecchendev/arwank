@@ -157,7 +157,6 @@ const Home = ({ arweave }) => {
         const data = JSON.parse(txdata);
         data.txid = txid;
         newStories.push(data);
-
       }
       setStories(newStories);
 

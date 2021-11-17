@@ -42,6 +42,8 @@ const Story = ({ arweave }) => {
 
   const [ contributors, setContributors ] = useState(null);
 
+  const [ hoveringContributor, setHoveringContributor ] = useState("");
+
   const [walletAddress, setWalletAddress] = useState(null);
 
   const { storyId } = useParams();
@@ -153,12 +155,15 @@ const Story = ({ arweave }) => {
             :
             <div>
               <h3>Contributors:</h3>
-              {contributors.map((addr) => <p>{addr}</p>)}
+              {Object.entries(contributors).map(([index, addr]) => <p className={hoveringContributor === (addr + index) ? "highlight" : ""} onMouseEnter={() => setHoveringContributor(addr + index)}
+            onMouseLeave={() => setHoveringContributor("")}>{addr}</p>)}
             </div>
           }
           <h2>{story.title}</h2>
           {
-            story.content.map((section) => <p>{section.text}</p>)
+            Object.entries(story.content).map(([index, section]) => {
+              return (<p className={hoveringContributor === (section.contributor + index) ? "highlight" : ""} onMouseEnter={() => setHoveringContributor(section.contributor + index)} onMouseLeave={() => setHoveringContributor("")}>{section.text}</p>)
+            })
           }
         </div>
         :
