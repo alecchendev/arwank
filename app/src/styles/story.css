@@ -15,7 +15,6 @@
 .mint-contributors-container {
   width: 35%;
   padding-top: 25px;
-  overflow-wrap: break-word;
 }
 
 .mint-edit-container {
@@ -24,6 +23,14 @@
 
 .edit-button-container {
   margin-left: 15px;
+}
+
+.contributors-container {
+  position: sticky;
+  top: 0;
+  max-height: 60vh;
+  overflow-wrap: break-word;
+  overflow-y: scroll;
 }
 
 @media (max-width: 800px) {

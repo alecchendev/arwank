@@ -133,6 +133,9 @@ const Story = ({ arweave }) => {
 
       <div className="top-bar">
         <Link to="/"><h1>Arwank</h1></Link>
+        {/* <div className="button-container">
+          <Link to={"/edit/" + storyId}><button>Edit</button></Link>
+        </div> */}
       </div>
 
       <div className="story-mint-container">
@@ -142,7 +145,7 @@ const Story = ({ arweave }) => {
             story
             ?
             <div>
-              <h2>{story.title}</h2>
+              <h1>{story.title}</h1>
               {
                 Object.entries(story.content).map(([index, section]) => {
                   return (<p className={hoveringContributor === (section.contributor + index) ? "highlight" : ""} onMouseEnter={() => setHoveringContributor(section.contributor + index)} onMouseLeave={() => setHoveringContributor("")}>{section.text}</p>)
@@ -157,19 +160,20 @@ const Story = ({ arweave }) => {
 
         <div className="mint-contributors-container">
 
-          <div className="mint-edit-container">
-          {
+          {/* <div className="mint-edit-container"> */}
+          {/* {
             walletAddress
             ?
             <button>Connected</button>
             :
             <button onClick={connectWallet}>Connect Wallet to Mint</button>
-          }
-            <div className="edit-button-container">
+          } */}
+            <div className="button-container">
               <Link to={"/edit/" + storyId}><button>Edit</button></Link>
             </div>
-          </div>
+          {/* </div> */}
 
+          <div className="contributors-container">
           {
             story
             ?
@@ -189,6 +193,9 @@ const Story = ({ arweave }) => {
             :
             <p>Loading...</p>
           }
+
+
+          </div>
 
         </div>
 

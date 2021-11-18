@@ -172,9 +172,6 @@ const Home = ({ arweave }) => {
 
       <div className="top-bar">
         <Link to="/"><h1>Arwank</h1></Link>
-        <div className="button-container">
-          <Link to="/edit"><button>Create</button></Link>
-        </div>
       </div>
 
       <p>
@@ -185,6 +182,10 @@ const Home = ({ arweave }) => {
         You can mint and purchase any piece as an NFT, and the money will go to everyone who contributed
         to that piece.
       </p>
+
+      <div className="create-button-container">
+        <Link to="/edit"><button>Create</button></Link>
+      </div>
 
       <h2>Explore</h2>
       {

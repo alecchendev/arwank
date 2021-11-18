@@ -305,7 +305,7 @@ const Edit = ({ arweave }) => {
         <p>Logged in: {pubkey}</p>
       }
 
-      <h2>Edit</h2>
+      {/* <h2>Edit</h2> */}
 
       <div className="text-editor">
         <input
