@@ -13,15 +13,18 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+
 button, input[type=file]::file-selector-button {
   font-family: "Roboto Mono", monospace;
+  font-size: 0.9rem;
   text-transform: uppercase;
-  padding: 10px 20px;
+  padding: 8px 15px;
   background-color: transparent;
   border: 1px solid black;
   border-radius: 5px;
   box-shadow: black 0px 5px;
   margin-bottom: 10px;
+  width: 100%;
 }
 
 button:hover, input[type=file]::file-selector-button:hover {
@@ -43,6 +46,11 @@ input[type="file"] { /* Mask the no file chosen label */
   background-color: #fff;
   content: '';
   color: white;
+}
+
+p {
+  margin-top: 0.5em;
+  font-size: 1.1rem;
 }
 
 p, li, textarea {

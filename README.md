@@ -21,6 +21,15 @@ A collaborative blogging platform using Arweave.
         1. create/(get + add) to list of contributors
         2. publish that to arweave
         3. create an account for that transaction with pointer to that list
+- [ ] Refactor - no blockchain
+    - [ ] Reformat posts
+        - contributors and their sections
+        - title is agnostic
+        - List of contributors if someone just wants to republish?
+    - [ ] Reformat gallery - arql
+
+
+
 - [ ] Tip contributors button as pre-nft functionality
 - [ ] Include preview metadata in pointer
 - [ ] Move wallet login to global state
