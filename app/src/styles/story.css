@@ -3,6 +3,10 @@
   width: 900px;
 }
 
+.story-title {
+  overflow-wrap: break-word;
+}
+
 .story-mint-container {
   display: flex;
 }
