@@ -122,7 +122,7 @@ const Edit = ({ arweave }) => {
     <div className="app">
 
       <div className="top-bar">
-        <Link to="/"><h1>Arwank</h1></Link>
+        <Link to="/"><h1>weavewrite</h1></Link>
         <div className="button-container">
           <div className="publish-container">
             {

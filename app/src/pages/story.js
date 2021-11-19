@@ -28,7 +28,7 @@ const Story = ({ arweave }) => {
     <div className="app app-wide">
 
       <div className="top-bar">
-        <Link to="/"><h1>Arwank</h1></Link>
+        <Link to="/"><h1>weavewrite</h1></Link>
       </div>
 
       <div className="story-mint-container">
