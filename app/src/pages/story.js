@@ -1,8 +1,9 @@
 
 
 import '../styles/story.css';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useParams } from "react-router-dom";
+import ReactMarkdown from 'react-markdown'
 
 import idl from '../data/idl.json';
 
@@ -148,7 +149,7 @@ const Story = ({ arweave }) => {
               <h1>{story.title}</h1>
               {
                 Object.entries(story.content).map(([index, section]) => {
-                  return (<p className={hoveringContributor === (section.contributor + index) ? "highlight" : ""} onMouseEnter={() => setHoveringContributor(section.contributor + index)} onMouseLeave={() => setHoveringContributor("")}>{section.text}</p>)
+                  return (<div className={hoveringContributor === (section.contributor + index) ? "highlight" : ""} onMouseEnter={() => setHoveringContributor(section.contributor + index)} onMouseLeave={() => setHoveringContributor("")}><ReactMarkdown children={section.text} /></div>)
                 })
               }
             </div>
