@@ -42,7 +42,7 @@ const Home = ({ arweave }) => {
 
   const [walletAddress, setWalletAddress] = useState(null);
 
-  const [ batchSize, setBatchSize ] = useState(9);
+  const [ batchSize, setBatchSize ] = useState(6);
   const [ nLoaded, setNLoaded ] = useState(0);
   const [ loading, setLoading ] = useState(true);
 
@@ -180,20 +180,19 @@ const Home = ({ arweave }) => {
   const loadMore = async () => {
     console.log("loading more...");
     setLoading(true);
-    let newStories = [...stories];
+    const newStories = [];
     let loaded = nLoaded;
-    for (let i = nLoaded; i < txids.length && i < batchSize; i += 1) {
+    for (let i = nLoaded; i < txids.length && i < stories.length + batchSize; i += 1) {
       const txid = txids[i];
       const txdata = await arweave.transactions.getData(txid, { decode: true, string: true });
       console.log(i);
       const data = JSON.parse(txdata);
       data.txid = txid;
-      // newStories.push(data);
-      // newStories = [...newStories, data];
-      setStories(stories => [...stories, data]);
+      newStories.push(data);
       loaded += 1;
     }
-    // setStories(newStories);
+
+    setStories(prevStories => [...prevStories, ...newStories]);
     setNLoaded(loaded);
     const newBatchSize = batchSize + 3;
     setBatchSize(newBatchSize);
