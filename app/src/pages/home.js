@@ -1,6 +1,6 @@
 
 import '../styles/home.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from "react-router-dom";
 
 import idl from '../data/idl.json';
@@ -41,6 +41,10 @@ const Home = ({ arweave }) => {
   const [ stories, setStories ] = useState(null);
 
   const [walletAddress, setWalletAddress] = useState(null);
+
+  const [ batchSize, setBatchSize ] = useState(6);
+  const [ nLoaded, setNLoaded ] = useState(0);
+  const [ loading, setLoading ] = useState(false);
 
   const getProvider = () => {
     const connection = new Connection(network, opts.preflightCommitment);
@@ -146,19 +150,24 @@ const Home = ({ arweave }) => {
     };
 
     try {
-
+      setLoading(true);
       const queryRes = await arweave.api.post(`arql`, query);
+      setTxids(queryRes.data);
       console.log("queryRes:", queryRes);
       const newStories = [];
-      for (let i = 0; i < queryRes.data.length; i += 1) {
+      let loaded = 0;
+      for (let i = 0; i < queryRes.data.length && i < batchSize; i += 1) {
         const txid = queryRes.data[i];
         const txdata = await arweave.transactions.getData(txid, { decode: true, string: true });
         console.log(txdata);
         const data = JSON.parse(txdata);
         data.txid = txid;
         newStories.push(data);
+        loaded += 1;
       }
       setStories(newStories);
+      setNLoaded(loaded);
+      setLoading(false);
 
     } catch (err) {
       console.log("query err:", err);
@@ -166,6 +175,30 @@ const Home = ({ arweave }) => {
 
     
   }, [])
+
+
+  const loadMore = async () => {
+    console.log("loading more...");
+    setLoading(true);
+    let newStories = [...stories];
+    let loaded = nLoaded;
+    for (let i = nLoaded; i < txids.length && i < batchSize; i += 1) {
+      const txid = txids[i];
+      const txdata = await arweave.transactions.getData(txid, { decode: true, string: true });
+      console.log(i);
+      const data = JSON.parse(txdata);
+      data.txid = txid;
+      // newStories.push(data);
+      // newStories = [...newStories, data];
+      setStories(stories => [...stories, data]);
+      loaded += 1;
+    }
+    // setStories(newStories);
+    setNLoaded(loaded);
+    const newBatchSize = batchSize + 3;
+    setBatchSize(newBatchSize);
+    setLoading(false);
+  }
 
   return (
     <div className="app">
@@ -190,7 +223,7 @@ const Home = ({ arweave }) => {
       <h2>Explore</h2>
       {
         stories
-        ?
+        &&
         <div className="gallery-container">
           {stories.map((story) => (
             <div className="story-card">
@@ -202,8 +235,20 @@ const Home = ({ arweave }) => {
           ))
         }
         </div>
-        :
+      }
+
+      {
+        loading
+        &&
         <p>Loading...</p>
+      }
+
+      {
+        (nLoaded > 0 && nLoaded < txids.length && !loading)
+        &&
+        <div className="load-more-container">
+          <button onClick={loadMore}>Load More</button>
+        </div>
       }
       
     </div>
