@@ -12,6 +12,11 @@
   padding-right: 25px;
 }
 
+.story-container {
+  text-decoration: none;
+  color: black;
+}
+
 .mint-contributors-container {
   width: 35%;
   padding-top: 25px;
@@ -31,6 +36,14 @@
   max-height: 60vh;
   overflow-wrap: break-word;
   overflow-y: scroll;
+}
+
+.highlight {
+    background-color: lightsteelblue;
+}
+
+.clickable:hover {
+  cursor: pointer;
 }
 
 @media (max-width: 800px) {

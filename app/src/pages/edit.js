@@ -89,6 +89,7 @@ const Edit = ({ arweave }) => {
     if (story && story != "New") {
       contributors = story.contributors;
       content = story.content;
+      content[content.length - 1].txid = storyId;
     } else {
 
     }
@@ -135,18 +136,11 @@ const Edit = ({ arweave }) => {
     var fr = new FileReader();
 
     fr.onload = function(e) {
-      //console.log(e.target.result);
       const result = JSON.parse(e.target.result);
-      // console.log("result: ", result);
       setKey(result);
-      //console.log(result.kty);
-      //var formatted = JSON.stringify(e, null, 2);
-      //document.write(formatted);
-      //document.getElementById('result').value = formatted;
           
       arweave.wallets.jwkToAddress(result).then((address) => {
           console.log(address);
-          // document.getElementById("loggedInAddress").textContent = address
           setPubkey(address);
       });   
     };

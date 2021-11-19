@@ -37,14 +37,14 @@ const Home = ({ arweave }) => {
   const [ baseAccount, setBaseAccount ] = useState();
   const [ baseAccountBump, setBaseAccountBump ] = useState();
 
-  const [ txids, setTxids ] = useState(['Gw9amRZUgcvJ3qttddDzoFaabcEMvR2ySptthzlEsIU']);
+  const [ txids, setTxids ] = useState([]);
   const [ stories, setStories ] = useState(null);
 
   const [walletAddress, setWalletAddress] = useState(null);
 
-  const [ batchSize, setBatchSize ] = useState(6);
+  const [ batchSize, setBatchSize ] = useState(9);
   const [ nLoaded, setNLoaded ] = useState(0);
-  const [ loading, setLoading ] = useState(false);
+  const [ loading, setLoading ] = useState(true);
 
   const getProvider = () => {
     const connection = new Connection(network, opts.preflightCommitment);

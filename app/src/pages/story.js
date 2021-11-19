@@ -129,6 +129,11 @@ const Story = ({ arweave }) => {
     setContributors(data.contributors); 
   }, [])
 
+  const goToStory = (newStoryId) => {
+    // because useNavigate wasn't working
+    window.location.href = window.location.href.replace(window.location.pathname, "") + "/story/" + newStoryId;
+  }
+
   return (
     <div className="app app-wide">
 
@@ -149,7 +154,13 @@ const Story = ({ arweave }) => {
               <h1>{story.title}</h1>
               {
                 Object.entries(story.content).map(([index, section]) => {
-                  return (<div className={hoveringContributor === (section.contributor + index) ? "highlight" : ""} onMouseEnter={() => setHoveringContributor(section.contributor + index)} onMouseLeave={() => setHoveringContributor("")}><ReactMarkdown children={section.text} /></div>)
+                  return (
+                    section.txid
+                    ?
+                    <div className={hoveringContributor === (section.contributor + index) ? "highlight clickable" : ""} onClick={() => goToStory(section.txid)} onMouseEnter={() => setHoveringContributor(section.contributor + index)} onMouseLeave={() => setHoveringContributor("")}><ReactMarkdown children={section.text} /></div>
+                    :
+                    <div className={hoveringContributor === (section.contributor + index) ? "highlight" : ""} onMouseEnter={() => setHoveringContributor(section.contributor + index)} onMouseLeave={() => setHoveringContributor("")}><ReactMarkdown children={section.text} /></div>
+                  )
                 })
               }
             </div>
