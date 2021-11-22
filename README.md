@@ -1,4 +1,4 @@
-# Arwank
+# weavewrite
 
 A collaborative blogging platform using Arweave.
 
